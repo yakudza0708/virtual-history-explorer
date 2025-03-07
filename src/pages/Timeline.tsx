@@ -1,271 +1,212 @@
 
 import React, { useState } from 'react';
-import { ArrowLeft, BookOpen } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
-import AnimatedTransition from '../components/AnimatedTransition';
 import TimelineComponent from '../components/TimelineComponent';
+import AnimatedTransition from '../components/AnimatedTransition';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Award, Clock, BookOpen, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-// Sample timeline events
-const timelineEvents = [
+// Sample historical events for the timeline
+const historicalEvents = [
   {
     id: 1,
     year: 1886,
-    title: "Основание учебного заведения",
-    description: "Основано Техническое училище почтово-телеграфного ведомства по указу императора Александра III. Это было первое в Европе высшее учебное заведение электротехнического профиля.",
-    image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop"
+    title: "Основание Технического училища почтово-телеграфного ведомства",
+    description: "15 июня 1886 года по указу императора Александра III было основано Техническое училище почтово-телеграфного ведомства — первое в России электротехническое учебное заведение.",
+    image: "https://images.unsplash.com/photo-1584697964358-3e14ca66f1ee?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 2,
     year: 1891,
     title: "Преобразование в Электротехнический институт",
-    description: "Техническое училище преобразовано в Электротехнический институт.",
-    image: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?q=80&w=800&auto=format&fit=crop"
+    description: "Техническое училище было преобразовано в Электротехнический институт, что позволило расширить программу обучения и привлечь новых преподавателей.",
+    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 3,
-    year: 1895,
-    title: "Изобретение радио А.С. Поповым",
-    description: "Профессор института Александр Степанович Попов демонстрирует первый в мире радиоприёмник на заседании Русского физико-химического общества 7 мая 1895 года.",
-    image: "https://images.unsplash.com/photo-1546531130-0157b3ac3a60?q=80&w=800&auto=format&fit=crop"
+    year: 1899,
+    title: "Присвоение имени Императора Александра III",
+    description: "Электротехническому институту было присвоено имя Императора Александра III, что подчеркнуло его значимость для развития технического образования в России.",
+    image: "https://images.unsplash.com/photo-1517404215738-15263e9f9178?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 4,
-    year: 1899,
-    title: "Первый выпуск инженеров-электриков",
-    description: "Институт осуществляет первый выпуск инженеров-электриков, получивших полноценное высшее образование в области электротехники.",
-    image: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=800&auto=format&fit=crop"
+    year: 1903,
+    title: "Начало работы А.С. Попова в институте",
+    description: "Александр Степанович Попов, изобретатель радио, становится профессором физики в Электротехническом институте и вносит значительный вклад в развитие радиотехники.",
+    image: "https://images.unsplash.com/photo-1581093458792-4d8513864ec0?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 5,
-    year: 1905,
-    title: "Переезд в новое здание",
-    description: "Институт переезжает в новое специально построенное здание на улице Профессора Попова (тогда называлась Аптекарский проспект).",
-    image: "https://images.unsplash.com/photo-1568992687947-868a62a9f521?q=80&w=800&auto=format&fit=crop"
+    year: 1918,
+    title: "Преобразования после Октябрьской революции",
+    description: "После Октябрьской революции институт был реорганизован. Изменились программы обучения, были открыты новые специальности, отражающие потребности молодого советского государства.",
+    image: "https://images.unsplash.com/photo-1590086650780-a1005439c3ab?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 6,
-    year: 1918,
-    title: "Национализация института",
-    description: "После Октябрьской революции институт был национализирован и реорганизован.",
-    image: "https://images.unsplash.com/photo-1531070992164-a9d0a5a9e03c?q=80&w=800&auto=format&fit=crop"
+    year: 1925,
+    title: "Присвоение имени В.И. Ульянова (Ленина)",
+    description: "Институту было присвоено имя В.И. Ульянова (Ленина), которое сохраняется в названии вуза до настоящего времени.",
+    image: "https://images.unsplash.com/photo-1561313466-b0b4ab10f1d8?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 7,
-    year: 1924,
-    title: "Присвоение имени В.И. Ульянова (Ленина)",
-    description: "Институту присвоено имя В.И. Ульянова (Ленина).",
-    image: "https://images.unsplash.com/photo-1575848642618-6e77e90a3348?q=80&w=800&auto=format&fit=crop"
+    year: 1941,
+    title: "ЛЭТИ в годы Великой Отечественной войны",
+    description: "Во время блокады Ленинграда многие сотрудники и студенты института ушли на фронт. Несмотря на тяжелейшие условия, в ЛЭТИ продолжались исследования для оборонной промышленности.",
+    image: "https://images.unsplash.com/photo-1590243429108-669f21e0c874?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 8,
-    year: 1941,
-    title: "Великая Отечественная война",
-    description: "Во время блокады Ленинграда многие студенты и сотрудники института ушли на фронт, другие продолжали работать в осажденном городе.",
-    image: "https://images.unsplash.com/photo-1570891838019-32037d6566e5?q=80&w=800&auto=format&fit=crop"
+    year: 1991,
+    title: "ЛЭТИ в постсоветский период",
+    description: "После распада СССР институт успешно адаптировался к новым экономическим условиям, сохранив и приумножив образовательный и научный потенциал.",
+    image: "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 9,
-    year: 1960,
-    title: "Развитие новых направлений",
-    description: "Институт активно развивает новые направления в области электроники, автоматики и вычислительной техники.",
-    image: "https://images.unsplash.com/photo-1517420879788-88ae3a855a8f?q=80&w=800&auto=format&fit=crop"
+    year: 2003,
+    title: "Получение статуса университета",
+    description: "ЛЭТИ получил статус университета и был переименован в Санкт-Петербургский государственный электротехнический университет «ЛЭТИ» им. В.И. Ульянова (Ленина).",
+    image: "https://images.unsplash.com/photo-1590086650892-e6f268be98df?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: 10,
-    year: 1992,
-    title: "Переименование в СПбГЭТУ 'ЛЭТИ'",
-    description: "После распада СССР институт получает статус государственного университета и переименован в Санкт-Петербургский государственный электротехнический университет 'ЛЭТИ'.",
-    image: "https://images.unsplash.com/photo-1573495612877-17ce96bfe202?q=80&w=800&auto=format&fit=crop"
-  },
-  {
-    id: 11,
-    year: 2020,
-    title: "Современное развитие",
-    description: "Университет продолжает активное развитие, внедряет новые образовательные программы и проводит инновационные исследования.",
-    image: "https://images.unsplash.com/photo-1588239034647-25783cbbebc0?q=80&w=800&auto=format&fit=crop"
+    year: 2021,
+    title: "ЛЭТИ в современную эпоху",
+    description: "Сегодня ЛЭТИ — один из ведущих технических вузов России, сочетающий традиции и инновации, активно участвующий в международных образовательных и научных проектах.",
+    image: "https://images.unsplash.com/photo-1584697964554-8ee1564c38d7?q=80&w=800&auto=format&fit=crop"
   }
 ];
 
-// Additional content for each event
-const additionalContent = {
-  1: {
-    details: "Техническое училище почтово-телеграфного ведомства было создано по инициативе директора Телеграфного департамента Н.К. Славинского. Первым директором училища стал Н.Г. Писаревский. Первоначально обучение длилось 4 года.",
-    facts: [
-      "Первый набор состоял всего из 16 студентов",
-      "Училище размещалось в здании Главного почтамта",
-      "В программу обучения входили как теоретические, так и практические занятия"
-    ]
-  },
-  3: {
-    details: "7 мая 1895 года на заседании Русского физико-химического общества Александр Степанович Попов продемонстрировал первый в мире радиоприёмник. Это изобретение стало результатом его работы в стенах Электротехнического института, где он преподавал физику и электротехнику.",
-    facts: [
-      "День 7 мая стал профессиональным праздником всех радиотехников",
-      "Первый радиоприёмник Попова представлял собой когерер (трубку с металлическими опилками)",
-      "В 1896 году Попов осуществил первую в России радиопередачу на расстояние 250 метров"
-    ]
-  },
-  5: {
-    details: "В 1903 году началось строительство специального комплекса зданий для Электротехнического института на Аптекарском проспекте. Проект был разработан архитектором А.Н. Векшинским. Торжественное открытие нового здания состоялось в 1905 году.",
-    facts: [
-      "Главное здание было построено в стиле модерн",
-      "На территории института были созданы современные по тем временам лаборатории",
-      "В новом здании был установлен первый в России рентгеновский аппарат"
-    ]
-  }
-};
-
-interface HistoricalEvent {
-  id: number;
-  year: number;
-  title: string;
-  description: string;
-  image?: string;
-}
-
 const Timeline = () => {
-  const [selectedEvent, setSelectedEvent] = useState<HistoricalEvent | null>(timelineEvents[0]);
-  const [showAdditionalContent, setShowAdditionalContent] = useState(false);
-  
-  const handleEventSelect = (event: HistoricalEvent) => {
+  const [selectedEvent, setSelectedEvent] = useState(historicalEvents[0]);
+  const [showDetailedView, setShowDetailedView] = useState(false);
+
+  const handleEventSelect = (event) => {
     setSelectedEvent(event);
-    setShowAdditionalContent(false);
-  };
-  
-  const toggleAdditionalContent = () => {
-    setShowAdditionalContent(!showAdditionalContent);
   };
 
   return (
     <AnimatedTransition>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-b from-background to-background/50">
         <Navigation />
         
-        <main className="pt-24 pb-16">
-          <div className="container mx-auto px-4">
-            {/* Page Header */}
-            <div className="mb-12">
-              <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors duration-200 mb-2">
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Вернуться на главную
-              </Link>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">Хронология истории ЛЭТИ</h1>
+        <main className="container mx-auto px-4 pt-24 pb-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">Хронология истории ЛЭТИ</h1>
               <p className="text-muted-foreground max-w-3xl">
-                Исследуйте ключевые моменты в истории Электротехнического института от основания до наших дней
+                Исследуйте ключевые моменты в истории Санкт-Петербургского государственного электротехнического университета «ЛЭТИ» им. В.И. Ульянова (Ленина), от основания до современности.
               </p>
             </div>
             
-            {/* Timeline Component */}
-            <TimelineComponent 
-              events={timelineEvents}
-              onEventSelect={handleEventSelect}
-            />
-            
-            {/* Additional Content */}
-            {selectedEvent && additionalContent[selectedEvent.id as keyof typeof additionalContent] && (
-              <div className="mt-8">
-                <button
-                  onClick={toggleAdditionalContent}
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-all duration-200 mb-4"
+            {showDetailedView ? (
+              <div className="animate-fade-in">
+                <Button
+                  variant="outline"
+                  className="mb-8"
+                  onClick={() => setShowDetailedView(false)}
                 >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  {showAdditionalContent ? 'Скрыть дополнительную информацию' : 'Показать дополнительную информацию'}
-                </button>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Вернуться к хронологии
+                </Button>
                 
-                {showAdditionalContent && (
-                  <div className="glass p-6 rounded-xl animate-fade-in">
-                    <h3 className="text-xl font-bold mb-4">Дополнительная информация</h3>
-                    <p className="mb-4">
-                      {additionalContent[selectedEvent.id as keyof typeof additionalContent].details}
-                    </p>
-                    
-                    <h4 className="text-lg font-semibold mb-2">Интересные факты:</h4>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {additionalContent[selectedEvent.id as keyof typeof additionalContent].facts.map((fact, index) => (
-                        <li key={index} className="text-muted-foreground">{fact}</li>
-                      ))}
-                    </ul>
+                <div className="glass rounded-xl overflow-hidden">
+                  <div className="aspect-video w-full relative">
+                    <img 
+                      src={selectedEvent.image} 
+                      alt={selectedEvent.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <div className="inline-block px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm font-medium mb-2">
+                        {selectedEvent.year} год
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{selectedEvent.title}</h2>
+                    </div>
                   </div>
-                )}
+                  
+                  <div className="p-6">
+                    <p className="mb-6">{selectedEvent.description}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                      <div className="glass p-4 rounded-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Award className="h-5 w-5 text-primary" />
+                          <h3 className="font-medium">Значение для ЛЭТИ</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Это событие стало важной вехой в истории университета, определив его дальнейшее развитие и место в системе образования.
+                        </p>
+                      </div>
+                      
+                      <div className="glass p-4 rounded-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Clock className="h-5 w-5 text-primary" />
+                          <h3 className="font-medium">Исторический контекст</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          В период {selectedEvent.year} года Россия переживала значительные изменения, которые отразились на развитии науки и образования.
+                        </p>
+                      </div>
+                      
+                      <div className="glass p-4 rounded-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <BookOpen className="h-5 w-5 text-primary" />
+                          <h3 className="font-medium">Научное наследие</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          В этот период были заложены основы для будущих научных достижений и открытий, которые впоследствии прославили университет.
+                        </p>
+                      </div>
+                      
+                      <div className="glass p-4 rounded-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <MapPin className="h-5 w-5 text-primary" />
+                          <h3 className="font-medium">Расположение</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          События происходили в исторических зданиях ЛЭТИ, некоторые из которых сохранились до наших дней и являются частью виртуального тура.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-8 flex justify-center">
+                      <Link
+                        to="/tour"
+                        className="animated-button bg-primary hover:bg-primary/90 text-white font-medium px-6 py-3 rounded-lg flex items-center gap-2"
+                      >
+                        Исследовать это место в виртуальном туре
+                        <ArrowLeft className="h-4 w-4 rotate-180" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="glass rounded-xl p-6">
+                <TimelineComponent 
+                  events={historicalEvents} 
+                  onEventSelect={handleEventSelect} 
+                />
+                
+                <div className="flex justify-center mt-10">
+                  <Button 
+                    className="animated-button bg-primary hover:bg-primary/90 text-white"
+                    onClick={() => setShowDetailedView(true)}
+                  >
+                    Подробнее о событии
+                    <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
         </main>
-        
-        {/* Related Links */}
-        <section className="py-12 bg-secondary/30">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold mb-6">Исследуйте больше</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Link to="/tour" className="glass p-6 rounded-xl transition-all duration-300 hover:shadow-xl hover:translate-y-[-5px]">
-                <h3 className="text-xl font-bold mb-2">Виртуальный тур</h3>
-                <p className="text-muted-foreground mb-4">
-                  Исследуйте исторические места ЛЭТИ через интерактивные панорамы
-                </p>
-                <div className="inline-flex items-center text-primary">
-                  Начать тур
-                  <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
-                </div>
-              </Link>
-              
-              <Link to="/about" className="glass p-6 rounded-xl transition-all duration-300 hover:shadow-xl hover:translate-y-[-5px]">
-                <h3 className="text-xl font-bold mb-2">О проекте</h3>
-                <p className="text-muted-foreground mb-4">
-                  Узнайте больше о проекте виртуального тура по истории ЛЭТИ
-                </p>
-                <div className="inline-flex items-center text-primary">
-                  Подробнее
-                  <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
-                </div>
-              </Link>
-              
-              <div className="glass p-6 rounded-xl transition-all duration-300 hover:shadow-xl hover:translate-y-[-5px]">
-                <h3 className="text-xl font-bold mb-2">Официальный сайт ЛЭТИ</h3>
-                <p className="text-muted-foreground mb-4">
-                  Посетите официальный сайт Санкт-Петербургского государственного электротехнического университета
-                </p>
-                <a 
-                  href="https://etu.ru" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-primary"
-                >
-                  Перейти на сайт
-                  <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Footer */}
-        <footer className="py-8 bg-secondary/50">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <div className="mb-4 md:mb-0">
-                <div className="text-xl font-bold flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-primary"></span>
-                  ЛЭТИ Тур
-                </div>
-              </div>
-              
-              <div className="flex gap-6">
-                <Link to="/" className="text-foreground/80 hover:text-primary transition-colors duration-200">
-                  Главная
-                </Link>
-                <Link to="/tour" className="text-foreground/80 hover:text-primary transition-colors duration-200">
-                  Виртуальный тур
-                </Link>
-                <Link to="/timeline" className="text-foreground/80 hover:text-primary transition-colors duration-200">
-                  Хронология
-                </Link>
-                <Link to="/about" className="text-foreground/80 hover:text-primary transition-colors duration-200">
-                  О проекте
-                </Link>
-              </div>
-            </div>
-          </div>
-        </footer>
       </div>
     </AnimatedTransition>
   );

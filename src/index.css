@@ -1,176 +1,134 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
+ 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
+ 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 221.2 83% 53.3%;
+ 
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
-
+ 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
+ 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 221.2 83% 53.3%;
+ 
+    --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
+ 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
+ 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83% 53.3%;
-
-    --radius: 0.75rem;
+    --ring: 221.2 83.2% 53.3%;
+ 
+    --radius: 0.5rem;
   }
-
+ 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
+ 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
+ 
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
+ 
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
-
+ 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
+ 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 91.2% 59.8%;
+ 
+    --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
+ 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-
+    --destructive-foreground: 210 40% 98%;
+ 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
 }
-
+ 
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer components {
   .glass {
-    @apply bg-white/30 backdrop-blur-md border border-white/20 shadow-lg;
-  }
-  
-  .nav-item {
-    @apply relative px-4 py-2 rounded-md transition-all duration-300 hover:bg-white/20;
-  }
-  
-  .nav-item::after {
-    content: '';
-    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300;
-  }
-  
-  .nav-item:hover::after {
-    @apply w-full;
-  }
-  
-  .timeline-node {
-    @apply w-4 h-4 rounded-full bg-primary relative z-10 transition-all duration-300;
-  }
-  
-  .timeline-node::before {
-    content: '';
-    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-primary/20 scale-0 transition-all duration-300;
-  }
-  
-  .timeline-node:hover::before {
-    @apply scale-100;
-  }
-  
-  .timeline-line {
-    @apply absolute top-2 left-2 w-0.5 h-full bg-border z-0;
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
   
   .animated-button {
-    @apply relative overflow-hidden rounded-lg px-6 py-3 transition-all duration-300;
+    @apply relative overflow-hidden transition-all duration-300 after:absolute after:inset-0 after:z-[-1] after:bg-primary/20 after:opacity-0 after:transition-opacity hover:after:opacity-100;
   }
   
-  .animated-button::before {
-    content: '';
-    @apply absolute inset-0 bg-primary/10 -translate-x-full transition-transform duration-300;
+  .nav-item {
+    @apply px-4 py-2 rounded-md transition-colors duration-200 hover:bg-primary/10 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:transform after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100;
   }
   
-  .animated-button:hover::before {
-    @apply translate-x-0;
+  .timeline-node {
+    @apply w-4 h-4 rounded-full transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
-  .panorama-hotspot {
-    @apply absolute w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-lg 
-           flex items-center justify-center cursor-pointer transition-all duration-300
-           hover:bg-white/40 hover:scale-110;
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
   
-  .panorama-info-card {
-    @apply absolute glass p-4 rounded-lg max-w-sm transition-all duration-500 opacity-0 scale-95
-           data-[visible=true]:opacity-100 data-[visible=true]:scale-100;
+  .animate-rotate-center {
+    animation: rotate 15s linear infinite;
   }
   
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
   
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
   }
   
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-border rounded-full hover:bg-muted-foreground/30 transition-colors duration-200;
-  }
-  
-  /* Page transitions */
-  .page-transition-enter {
-    @apply opacity-0;
-  }
-  
-  .page-transition-enter-active {
-    @apply opacity-100 transition-opacity duration-300;
-  }
-  
-  .page-transition-exit {
-    @apply opacity-100;
-  }
-  
-  .page-transition-exit-active {
-    @apply opacity-0 transition-opacity duration-300;
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
