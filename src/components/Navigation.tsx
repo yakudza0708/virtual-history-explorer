@@ -1,102 +1,123 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Home, Clock, Info } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
+  // Close mobile menu when changing routes
   useEffect(() => {
     setIsOpen(false);
   }, [location]);
 
   const navigationItems = [
-    { name: 'Главная', path: '/' },
-    { name: 'Виртуальный тур', path: '/tour' },
-    { name: 'Хронология', path: '/timeline' },
-    { name: 'О проекте', path: '/about' },
+    { name: 'Главная', path: '/', icon: <Home size={18} /> },
+    { name: 'Виртуальный тур', path: '/tour', icon: <Home size={18} /> },
+    { name: 'Хронология', path: '/timeline', icon: <Clock size={18} /> },
+    { name: 'О проекте', path: '/about', icon: <Info size={18} /> },
   ];
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'py-3 glass' : 'py-6 bg-transparent'
-      }`}
-    >
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between">
-          <Link 
-            to="/" 
-            className="text-xl md:text-2xl font-bold text-foreground flex items-center gap-2"
-          >
-            <span className="relative">
-              <span className="animate-rotate-center absolute inset-0 border-2 border-primary/50 rounded-full" />
-              <span className="block w-8 h-8 rounded-full bg-primary" />
-            </span>
-            <span className="relative group">
-              <span className="block transition-transform group-hover:translate-y-1 opacity-0 group-hover:opacity-100 absolute h-0.5 w-full bg-primary duration-300" />
-              ЛЭТИ Тур
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`nav-item ${
-                  location.pathname === item.path ? 'text-primary font-medium' : 'text-foreground/80'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-foreground"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? 'Close Menu' : 'Open Menu'}
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Navigation */}
-      <div
-        className={`md:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-md transition-all duration-300 ease-in-out ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="flex flex-col items-center justify-center h-full">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`text-2xl py-4 ${
-                location.pathname === item.path ? 'text-primary font-medium' : 'text-foreground/80'
-              }`}
+    <>
+      {/* Fixed header/navbar */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <Link 
+              to="/" 
+              className="text-xl font-bold text-foreground flex items-center gap-2"
             >
-              {item.name}
+              <span className="block w-6 h-6 rounded-full bg-primary" />
+              ЛЭТИ Тур
             </Link>
-          ))}
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-1">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
+                    location.pathname === item.path 
+                      ? "bg-primary/10 text-primary font-medium" 
+                      : "text-foreground/80 hover:bg-primary/5 hover:text-foreground"
+                  )}
+                >
+                  {item.icon}
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden rounded-md p-2 text-foreground hover:bg-primary/5"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Close Menu' : 'Open Menu'}
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Navigation Drawer */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 transform transition-transform ease-in-out duration-300 md:hidden",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <div className="bg-background h-full w-full flex flex-col">
+          {/* Mobile Menu Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <Link 
+              to="/" 
+              className="text-xl font-bold text-foreground"
+              onClick={() => setIsOpen(false)}
+            >
+              ЛЭТИ Тур
+            </Link>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 rounded-md text-foreground hover:bg-primary/5"
+              aria-label="Close Menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Mobile Menu Items */}
+          <div className="flex-1 overflow-y-auto py-4">
+            <nav className="flex flex-col space-y-1 px-3">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-md transition-colors",
+                    location.pathname === item.path 
+                      ? "bg-primary/10 text-primary font-medium" 
+                      : "text-foreground/80 hover:bg-primary/5 hover:text-foreground"
+                  )}
+                >
+                  {item.icon}
+                  <span className="text-lg">{item.name}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       </div>
-    </header>
+
+      {/* Add spacing to ensure content doesn't hide behind the fixed header */}
+      <div className="h-16"></div>
+    </>
   );
 };
 
