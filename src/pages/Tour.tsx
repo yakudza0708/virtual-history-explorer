@@ -151,7 +151,7 @@ const Tour = () => {
             <div className="glass rounded-xl overflow-hidden mb-8">
               <div className="relative aspect-[16/9]">
                 <PanoramaViewer 
-                  imageUrl={activeLocation.panoramaUrl} 
+                  panoramaUrl={activeLocation.panoramaUrl} 
                   hotspots={activeLocation.points} 
                 />
                 
