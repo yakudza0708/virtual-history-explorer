@@ -189,23 +189,27 @@ const TimelineComponent: React.FC<TimelineProps> = ({ events, onEventSelect }) =
         </div>
       )}
 
-      <style jsx>{`
-        .timeline-node {
-          width: 1rem;
-          height: 1rem;
-          border-radius: 50%;
-          transition: all 0.3s ease;
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
+      {/* Using regular style tag instead of style jsx */}
+      <style>
+        {`
+          .timeline-node {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+          }
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}
+      </style>
     </div>
   );
 };
 
 export default TimelineComponent;
+
