@@ -21,6 +21,30 @@ const TimelineComponent: React.FC<TimelineProps> = ({ events, onEventSelect }) =
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    // Preload images
+    events.forEach((event) => {
+      if (event.image) {
+        const img = new Image();
+        img.src = event.image;
+        img.onload = () => {
+          setImagesLoaded(prev => ({
+            ...prev,
+            [event.id]: true
+          }));
+        };
+        img.onerror = () => {
+          console.error(`Failed to load image for event ${event.id}: ${event.image}`);
+          setImagesLoaded(prev => ({
+            ...prev,
+            [event.id]: false
+          }));
+        };
+      }
+    });
+  }, [events]);
 
   useEffect(() => {
     if (activeEventId !== null) {
@@ -145,6 +169,13 @@ const TimelineComponent: React.FC<TimelineProps> = ({ events, onEventSelect }) =
                       src={event.image} 
                       alt={event.title} 
                       className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                      loading="eager"
+                      onError={(e) => {
+                        // Fallback if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                        target.alt = "Image could not be loaded";
+                      }}
                     />
                   </div>
                 )}
@@ -157,6 +188,22 @@ const TimelineComponent: React.FC<TimelineProps> = ({ events, onEventSelect }) =
             ))}
         </div>
       )}
+
+      <style jsx>{`
+        .timeline-node {
+          width: 1rem;
+          height: 1rem;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };
