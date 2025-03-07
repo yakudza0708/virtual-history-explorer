@@ -1,10 +1,9 @@
-
 import React from 'react';
 import Navigation from '../components/Navigation';
 import AnimatedTransition from '../components/AnimatedTransition';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Heart, GitHub, Mail, Award, BookOpen } from 'lucide-react';
+import { Heart, Github, Mail, Award, BookOpen } from 'lucide-react';
 
 const About = () => {
   return (
@@ -161,7 +160,7 @@ const About = () => {
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    <GitHub className="h-5 w-5 text-primary" />
+                    <Github className="h-5 w-5 text-primary" />
                     <span>github.com/leti-history-tour</span>
                   </div>
                 </div>
