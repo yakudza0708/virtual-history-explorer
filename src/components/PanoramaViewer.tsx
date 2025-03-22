@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import 'pannellum/build/pannellum.css';
 
-// We need to import Pannellum using this approach to avoid TypeScript errors
+// Import Pannellum
 declare const window: Window & {
   pannellum: any;
 };
@@ -34,34 +34,36 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [viewer, setViewer] = useState<any>(null);
+  const hasInitialized = useRef(false);
 
-  // Set up Pannellum when the component mounts
+  // Set up Pannellum with optimized configuration
   useEffect(() => {
-    if (!panoramaRef.current || !window.pannellum) return;
+    if (!panoramaRef.current || !window.pannellum || hasInitialized.current) return;
     
+    hasInitialized.current = true;
     setIsLoading(true);
 
-    // Convert our hotspots to Pannellum format
+    // Convert hotspots to Pannellum format
     const pannellumHotspots = hotspots.map(hotspot => ({
       id: hotspot.id,
-      pitch: (hotspot.position.y - 50) * 0.9, // Convert from percentage to pitch (-45 to 45 degrees)
-      yaw: (hotspot.position.x - 50) * 3.6,   // Convert from percentage to yaw (-180 to 180 degrees)
+      pitch: (hotspot.position.y - 50) * 0.9,
+      yaw: (hotspot.position.x - 50) * 3.6,
       type: "info",
       text: hotspot.title,
-      originalHotspot: hotspot // Store the original hotspot to use when clicked
+      originalHotspot: hotspot
     }));
 
-    // Initialize Pannellum viewer
+    // Optimize Pannellum configuration
     const pannellumViewer = window.pannellum.viewer(panoramaRef.current, {
       type: 'equirectangular',
       panorama: panoramaUrl,
       autoLoad: true,
-      autoRotate: -2, // Slow auto-rotation
+      autoRotate: -1,
       compass: false,
       showZoomCtrl: true,
       showFullscreenCtrl: true,
       hotSpots: pannellumHotspots,
-      hfov: 100, // Horizontal field of view in degrees
+      hfov: 100,
       minHfov: 50,
       maxHfov: 120,
       pitch: 0,
@@ -70,18 +72,19 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
       mouseZoom: true,
       keyboardZoom: true,
       showControls: true,
-      friction: 0.15, // Lower value provides smoother rotation
+      friction: 0.15,
+      dynamic: false, // Disable dynamic loading for better performance
+      sceneFadeDuration: 500, // Faster scene transitions
       onLoad: () => {
         setIsLoading(false);
-        toast("Панорама загружена!", {
-          description: "Используйте мышь для вращения и перемещения панорамы.",
-          duration: 3000,
+        toast("Панорама загружена", {
+          duration: 1500,
         });
       },
       onError: (err: string) => {
         setIsLoading(false);
-        toast.error("Ошибка загрузки панорамы", {
-          description: err || "Пожалуйста, попробуйте обновить страницу.",
+        toast.error("Ошибка загрузки", {
+          description: "Проверьте подключение",
         });
       }
     });
@@ -101,66 +104,78 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
 
     // Clean up on unmount
     return () => {
-      if (viewer) {
-        viewer.destroy();
+      if (pannellumViewer) {
+        pannellumViewer.destroy();
       }
     };
   }, [panoramaUrl, hotspots, onHotspotClick]);
+
+  // Update panorama when URL changes
+  useEffect(() => {
+    if (viewer && panoramaUrl) {
+      setIsLoading(true);
+      viewer.loadScene('default', { 
+        panorama: panoramaUrl,
+        hotSpots: hotspots.map(hotspot => ({
+          id: hotspot.id,
+          pitch: (hotspot.position.y - 50) * 0.9,
+          yaw: (hotspot.position.x - 50) * 3.6,
+          type: "info",
+          text: hotspot.title,
+          originalHotspot: hotspot
+        }))
+      }, () => {
+        setIsLoading(false);
+      });
+    }
+  }, [panoramaUrl, viewer]);
 
   const closeHotspotInfo = () => {
     setActiveHotspot(null);
   };
 
   return (
-    <div className="relative w-full h-[500px] md:h-[70vh] overflow-hidden rounded-lg shadow-xl bg-black/20">
+    <div className="relative w-full h-[500px] md:h-[70vh] overflow-hidden rounded-lg shadow-lg bg-black/10">
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/30 backdrop-blur-sm z-10">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-foreground">Загрузка панорамы...</p>
-          </div>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
+          <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
       
-      <div 
-        ref={panoramaRef} 
-        className="w-full h-full"
-      />
+      <div ref={panoramaRef} className="w-full h-full" />
 
-      {/* Hotspot Information Panel */}
+      {/* Simplified Hotspot Information Panel */}
       {activeHotspot && (
-        <div className="absolute right-4 top-4 max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-4 rounded-lg shadow-lg border border-white/20 dark:border-gray-700/50 animate-fade-in z-20">
+        <div className="absolute right-4 top-4 max-w-xs bg-white/90 dark:bg-gray-800/90 p-3 rounded-lg shadow-md z-20">
           <button
             onClick={closeHotspotInfo}
-            className="absolute right-2 top-2 text-foreground/80 hover:text-foreground transition-colors duration-200"
+            className="absolute right-2 top-2 text-foreground/80 hover:text-foreground"
             aria-label="Закрыть"
           >
-            <X size={16} />
+            <X size={14} />
           </button>
           
-          <h3 className="text-lg font-medium mb-2">{activeHotspot.title}</h3>
+          <h3 className="text-base font-medium mb-1">{activeHotspot.title}</h3>
           
           {activeHotspot.image && (
-            <div className="mb-3 rounded-md overflow-hidden">
-              <img
-                src={activeHotspot.image}
-                alt={activeHotspot.title}
-                className="w-full h-auto object-cover"
-                loading="eager"
-              />
-            </div>
+            <img
+              src={activeHotspot.image}
+              alt={activeHotspot.title}
+              className="w-full h-auto object-cover mb-2 rounded"
+              loading="lazy"
+            />
           )}
           
-          <p className="text-sm text-foreground/80 mb-4">{activeHotspot.description}</p>
+          <p className="text-xs text-foreground/80 mb-2">{activeHotspot.description}</p>
           
           {activeHotspot.link && (
             <a
               href={activeHotspot.link}
-              className="text-sm text-primary font-medium hover:underline"
+              className="text-xs text-primary hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Узнать больше
+              Подробнее
             </a>
           )}
         </div>
@@ -168,34 +183,11 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
 
       <style>
         {`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          
-          .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-          }
-          
-          /* Override some Pannellum styles for better integration */
-          .pnlm-container {
-            background-color: #000 !important;
-          }
-          
-          .pnlm-hotspot {
-            height: 26px;
-            width: 26px;
-            border-radius: 13px;
-          }
-          
-          .pnlm-hotspot-base.info {
-            background-color: rgba(58, 68, 255, 0.8);
-            border: 2px solid #fff;
-          }
-          
-          .pnlm-hotspot:hover {
-            background-color: rgba(58, 68, 255, 1);
-          }
+          /* Minimized CSS */
+          .pnlm-container { background-color: #000 !important; }
+          .pnlm-hotspot { height: 20px; width: 20px; border-radius: 10px; }
+          .pnlm-hotspot-base.info { background-color: rgba(58, 68, 255, 0.7); border: 1px solid #fff; }
+          .pnlm-hotspot:hover { background-color: rgba(58, 68, 255, 1); }
         `}
       </style>
     </div>
