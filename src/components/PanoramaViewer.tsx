@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from "sonner";
 import 'pannellum/build/pannellum.css';
 
-// Import Pannellum
+// Import Pannellum properly using script loading
 declare const window: Window & {
   pannellum: any;
 };
@@ -38,12 +38,39 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const viewerRef = useRef<any>(null);
   const [initialized, setInitialized] = useState(false);
+  const [pannellumLoaded, setPannellumLoaded] = useState(false);
+
+  // Load Pannellum script
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    if (window.pannellum) {
+      setPannellumLoaded(true);
+      return;
+    }
+    
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js';
+    script.async = true;
+    script.onload = () => {
+      console.log('Pannellum loaded successfully');
+      setPannellumLoaded(true);
+    };
+    script.onerror = () => {
+      console.error('Failed to load Pannellum');
+      toast.error('Ошибка загрузки библиотеки панорамы');
+    };
+    
+    document.body.appendChild(script);
+    
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   // Initialize or update Pannellum when component mounts or when panoramaUrl changes
   useEffect(() => {
-    // Make sure pannellum is available and container exists
-    if (!panoramaRef.current || typeof window === 'undefined' || !window.pannellum) {
-      console.error("Pannellum or container not available");
+    if (!pannellumLoaded || !panoramaRef.current) {
       return;
     }
 
@@ -136,7 +163,7 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
         viewerRef.current = null;
       }
     };
-  }, [panoramaUrl, hotspots, onHotspotClick, autoRotate, initialHfov]);
+  }, [panoramaUrl, hotspots, onHotspotClick, autoRotate, initialHfov, pannellumLoaded]);
 
   return (
     <div className="relative w-full overflow-hidden rounded-lg shadow-md bg-black/5" style={{ height }}>
@@ -148,7 +175,6 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
       
       <div ref={panoramaRef} className="w-full h-full" />
 
-      {/* Fix: Remove the 'jsx' property which caused the TypeScript error */}
       <style>
         {`
         .pnlm-container { background-color: transparent !important; }

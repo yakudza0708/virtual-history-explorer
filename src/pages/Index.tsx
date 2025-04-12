@@ -4,30 +4,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, MapPin, BookOpen, Award } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import AnimatedTransition from '../components/AnimatedTransition';
-import HistoricalEvent from '../components/HistoricalEvent';
 
 // Placeholder image URLs (should be replaced with actual images)
 const heroImage = "https://images.unsplash.com/photo-1568992687947-868a62a9f521?q=80&w=1600&auto=format&fit=crop";
-const letiImage1 = "https://images.unsplash.com/photo-1584697964358-3e14ca66f1ee?q=80&w=800&auto=format&fit=crop";
-const letiImage2 = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop";
 const tourImage = "https://images.unsplash.com/photo-1517404215738-15263e9f9178?q=80&w=800&auto=format&fit=crop";
-
-const featuredEvents = [
-  {
-    id: 1,
-    title: "Основание Электротехнического института",
-    year: 1886,
-    description: "Учебное заведение основано по указу императора Александра III как Техническое училище почтово-телеграфного ведомства. Это было первое в Европе высшее учебное заведение электротехнического профиля.",
-    image: letiImage1
-  },
-  {
-    id: 2,
-    title: "Преобразование в Электротехнический институт",
-    year: 1891,
-    description: "Учебное заведение преобразовано в Электротехнический институт. В этот период началось активное развитие научных исследований в области электротехники под руководством выдающихся ученых.",
-    image: letiImage2
-  }
-];
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -147,45 +127,6 @@ const Index = () => {
                   Проверьте свои знания об истории ЛЭТИ с помощью интерактивных тестов и увлекательных викторин
                 </p>
               </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Featured Historical Events */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
-                Ключевые моменты
-              </span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                История ЛЭТИ в деталях
-              </h2>
-              <p className="text-muted-foreground">
-                Узнайте о важнейших событиях, которые сформировали один из ведущих технических университетов России
-              </p>
-            </div>
-            
-            {featuredEvents.map((event, index) => (
-              <HistoricalEvent
-                key={event.id}
-                title={event.title}
-                year={event.year}
-                description={event.description}
-                image={event.image}
-                reversed={index % 2 !== 0}
-                onClick={() => window.location.href = '/timeline'}
-              />
-            ))}
-            
-            <div className="text-center mt-12">
-              <Link
-                to="/timeline"
-                className="animated-button inline-flex items-center px-6 py-3 rounded-lg bg-primary text-white font-medium"
-              >
-                Смотреть полную хронологию
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
             </div>
           </div>
         </section>
