@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Tour from "./pages/Tour";
-import Timeline from "./pages/Timeline";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import AnimatedTransition from "./components/AnimatedTransition";
@@ -22,7 +21,6 @@ const App = () => (
         <Routes>
           <Route path="/" element={<AnimatedTransition><Index /></AnimatedTransition>} />
           <Route path="/tour" element={<AnimatedTransition><Tour /></AnimatedTransition>} />
-          <Route path="/timeline" element={<AnimatedTransition><Timeline /></AnimatedTransition>} />
           <Route path="/about" element={<AnimatedTransition><About /></AnimatedTransition>} />
           <Route path="*" element={<AnimatedTransition><NotFound /></AnimatedTransition>} />
         </Routes>

@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Clock, Info } from 'lucide-react';
+import { Menu, X, Home, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Navigation = () => {
@@ -16,7 +15,6 @@ const Navigation = () => {
   const navigationItems = [
     { name: 'Главная', path: '/', icon: <Home size={18} /> },
     { name: 'Виртуальный тур', path: '/tour', icon: <Home size={18} /> },
-    { name: 'Хронология', path: '/timeline', icon: <Clock size={18} /> },
     { name: 'О проекте', path: '/about', icon: <Info size={18} /> },
   ];
 

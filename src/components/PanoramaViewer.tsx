@@ -41,10 +41,17 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
   const [viewer, setViewer] = useState<any>(null);
   const hasInitialized = useRef(false);
 
+  // Clear initialization flag when panorama URL changes
+  useEffect(() => {
+    if (panoramaUrl) {
+      hasInitialized.current = false;
+    }
+  }, [panoramaUrl]);
+
   // Set up Pannellum with optimized configuration
   useEffect(() => {
     // Early return if conditions aren't met
-    if (!panoramaRef.current || !window.pannellum || hasInitialized.current) return;
+    if (!panoramaRef.current || !window.pannellum || hasInitialized.current || !panoramaUrl) return;
     
     hasInitialized.current = true;
     setIsLoading(true);
@@ -114,7 +121,6 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
       return () => {
         if (pannellumViewer) {
           pannellumViewer.destroy();
-          hasInitialized.current = false;
         }
       };
     } catch (error) {
@@ -123,38 +129,6 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
       toast.error("Ошибка инициализации панорамы");
     }
   }, [panoramaUrl, hotspots, onHotspotClick, autoRotate, initialHfov]);
-
-  // Update panorama when URL changes
-  useEffect(() => {
-    if (viewer && panoramaUrl) {
-      try {
-        setIsLoading(true);
-        
-        // Update hotspots if they exist
-        const sceneConfig: any = { panorama: panoramaUrl };
-        
-        if (hotspots.length > 0) {
-          sceneConfig.hotSpots = hotspots.map(hotspot => ({
-            id: hotspot.id,
-            pitch: (hotspot.position.y - 50) * 0.9,
-            yaw: (hotspot.position.x - 50) * 3.6,
-            type: "info",
-            text: hotspot.title,
-            originalHotspot: hotspot
-          }));
-        }
-        
-        // Load the new panorama
-        viewer.loadScene('default', sceneConfig, () => {
-          setIsLoading(false);
-        });
-      } catch (error) {
-        console.error("Failed to update panorama:", error);
-        setIsLoading(false);
-        toast.error("Ошибка обновления панорамы");
-      }
-    }
-  }, [panoramaUrl, viewer, hotspots]);
 
   const closeHotspotInfo = () => {
     setActiveHotspot(null);
