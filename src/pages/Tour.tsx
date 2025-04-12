@@ -15,7 +15,7 @@ const panoramaLocations = [
     name: "Музей истории ЛЭТИ",
     year: 1946,
     description: "Исторический музей университета, содержащий экспонаты, связанные с историей электротехники и развитием ЛЭТИ.",
-    panoramaUrl: "/lovable-uploads/6ee8e2b6-a0a3-4c02-bb9e-5034b4777ff1.png",
+    panoramaUrl: "/lovable-uploads/8c25670f-cdb8-4e0f-96a8-7f2d078b3227.png",
     points: [
       {
         id: "point-1",
@@ -28,6 +28,12 @@ const panoramaLocations = [
         position: { x: 76, y: 45 },
         title: "Стенды с историческими документами",
         description: "Исторические фотографии и документы.",
+      },
+      {
+        id: "point-3",
+        position: { x: 50, y: 60 },
+        title: "Центральная инсталляция",
+        description: "Геометрическая конструкция в центре зала, символизирующая достижения в науке.",
       }
     ]
   },
@@ -36,7 +42,7 @@ const panoramaLocations = [
     name: "Главный вход",
     year: 1905,
     description: "Исторический вход в главное здание ЛЭТИ, построенное в начале XX века.",
-    panoramaUrl: "https://images.unsplash.com/photo-1583163501239-9deb12502a1a?q=80&w=2000&auto=format&fit=crop",
+    panoramaUrl: "https://images.unsplash.com/photo-1583163501239-9deb12502a1a?q=80&w=1600&auto=format&fit=crop",
     points: [
       {
         id: "point-1",
@@ -51,7 +57,7 @@ const panoramaLocations = [
     name: "Лаборатория Попова",
     year: 1903,
     description: "Реконструкция лаборатории А.С. Попова, изобретателя радио и преподавателя ЛЭТИ.",
-    panoramaUrl: "https://images.unsplash.com/photo-1581093196277-9f608bb3b1a9?q=80&w=2000&auto=format&fit=crop",
+    panoramaUrl: "https://images.unsplash.com/photo-1581093196277-9f608bb3b1a9?q=80&w=1600&auto=format&fit=crop",
     points: [
       {
         id: "point-1",

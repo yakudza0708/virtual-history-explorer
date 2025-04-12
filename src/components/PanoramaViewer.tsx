@@ -207,12 +207,14 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
         </div>
       )}
 
-      <style jsx>{`
+      <style>
+        {`
         .pnlm-container { background-color: transparent !important; }
         .pnlm-hotspot { height: 20px; width: 20px; border-radius: 10px; }
         .pnlm-hotspot-base.info { background-color: rgba(58, 68, 255, 0.7); border: 1px solid #fff; }
         .pnlm-hotspot:hover { background-color: rgba(58, 68, 255, 1); }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
