@@ -1,7 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Info, X } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { X } from 'lucide-react';
 import { toast } from "sonner";
 import 'pannellum/build/pannellum.css';
 
@@ -21,14 +20,20 @@ interface Hotspot {
 
 interface PanoramaViewerProps {
   panoramaUrl: string;
-  hotspots: Hotspot[];
+  hotspots?: Hotspot[];
   onHotspotClick?: (hotspot: Hotspot) => void;
+  autoRotate?: boolean;
+  initialHfov?: number;  // Initial horizontal field of view (zoom level)
+  height?: string;      // Container height
 }
 
 const PanoramaViewer: React.FC<PanoramaViewerProps> = ({ 
   panoramaUrl, 
-  hotspots,
-  onHotspotClick
+  hotspots = [],
+  onHotspotClick,
+  autoRotate = true,
+  initialHfov = 100,
+  height = "500px"
 }) => {
   const panoramaRef = useRef<HTMLDivElement>(null);
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
@@ -38,6 +43,7 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
 
   // Set up Pannellum with optimized configuration
   useEffect(() => {
+    // Early return if conditions aren't met
     if (!panoramaRef.current || !window.pannellum || hasInitialized.current) return;
     
     hasInitialized.current = true;
@@ -53,98 +59,118 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
       originalHotspot: hotspot
     }));
 
-    // Optimize Pannellum configuration
-    const pannellumViewer = window.pannellum.viewer(panoramaRef.current, {
-      type: 'equirectangular',
-      panorama: panoramaUrl,
-      autoLoad: true,
-      autoRotate: -1,
-      compass: false,
-      showZoomCtrl: true,
-      showFullscreenCtrl: true,
-      hotSpots: pannellumHotspots,
-      hfov: 100,
-      minHfov: 50,
-      maxHfov: 120,
-      pitch: 0,
-      yaw: 0,
-      draggable: true,
-      mouseZoom: true,
-      keyboardZoom: true,
-      showControls: true,
-      friction: 0.15,
-      dynamic: false, // Disable dynamic loading for better performance
-      sceneFadeDuration: 500, // Faster scene transitions
-      onLoad: () => {
-        setIsLoading(false);
-        toast("Панорама загружена", {
-          duration: 1500,
-        });
-      },
-      onError: (err: string) => {
-        setIsLoading(false);
-        toast.error("Ошибка загрузки", {
-          description: "Проверьте подключение",
-        });
-      }
-    });
-
-    // Handle hotspot clicks
-    pannellumViewer.on('click', (event: MouseEvent) => {
-      const clickedHotspot = pannellumViewer.getHotspotById(pannellumViewer.mouseEventToCoords(event));
-      if (clickedHotspot && clickedHotspot.originalHotspot) {
-        setActiveHotspot(clickedHotspot.originalHotspot);
-        if (onHotspotClick) {
-          onHotspotClick(clickedHotspot.originalHotspot);
+    try {
+      // Initialize Pannellum with optimal performance settings
+      const pannellumViewer = window.pannellum.viewer(panoramaRef.current, {
+        type: 'equirectangular',
+        panorama: panoramaUrl,
+        autoLoad: true,
+        autoRotate: autoRotate ? -1 : 0,
+        compass: false,
+        showZoomCtrl: true,
+        showFullscreenCtrl: true,
+        hotSpots: pannellumHotspots,
+        hfov: initialHfov,
+        minHfov: 50,
+        maxHfov: 120,
+        friction: 0.15,
+        mouseZoom: true,
+        touchPanEnabled: true,
+        draggable: true,
+        disableKeyboardCtrl: false,
+        dynamic: false,
+        sceneFadeDuration: 300,
+        onLoad: () => {
+          setIsLoading(false);
+          toast.success("Панорама загружена", {
+            duration: 1500,
+          });
+        },
+        onError: (err: string) => {
+          console.error("Pannellum error:", err);
+          setIsLoading(false);
+          toast.error("Ошибка загрузки панорамы", {
+            description: "Проверьте URL изображения",
+          });
         }
-      }
-    });
+      });
 
-    setViewer(pannellumViewer);
-
-    // Clean up on unmount
-    return () => {
-      if (pannellumViewer) {
-        pannellumViewer.destroy();
+      // Handle hotspot clicks
+      if (hotspots.length > 0) {
+        pannellumViewer.on('click', (event: MouseEvent) => {
+          const clickedHotspot = pannellumViewer.getHotspotById(pannellumViewer.mouseEventToCoords(event));
+          if (clickedHotspot && clickedHotspot.originalHotspot) {
+            setActiveHotspot(clickedHotspot.originalHotspot);
+            if (onHotspotClick) {
+              onHotspotClick(clickedHotspot.originalHotspot);
+            }
+          }
+        });
       }
-    };
-  }, [panoramaUrl, hotspots, onHotspotClick]);
+
+      setViewer(pannellumViewer);
+
+      // Clean up on unmount
+      return () => {
+        if (pannellumViewer) {
+          pannellumViewer.destroy();
+          hasInitialized.current = false;
+        }
+      };
+    } catch (error) {
+      console.error("Failed to initialize panorama:", error);
+      setIsLoading(false);
+      toast.error("Ошибка инициализации панорамы");
+    }
+  }, [panoramaUrl, hotspots, onHotspotClick, autoRotate, initialHfov]);
 
   // Update panorama when URL changes
   useEffect(() => {
     if (viewer && panoramaUrl) {
-      setIsLoading(true);
-      viewer.loadScene('default', { 
-        panorama: panoramaUrl,
-        hotSpots: hotspots.map(hotspot => ({
-          id: hotspot.id,
-          pitch: (hotspot.position.y - 50) * 0.9,
-          yaw: (hotspot.position.x - 50) * 3.6,
-          type: "info",
-          text: hotspot.title,
-          originalHotspot: hotspot
-        }))
-      }, () => {
+      try {
+        setIsLoading(true);
+        
+        // Update hotspots if they exist
+        const sceneConfig: any = { panorama: panoramaUrl };
+        
+        if (hotspots.length > 0) {
+          sceneConfig.hotSpots = hotspots.map(hotspot => ({
+            id: hotspot.id,
+            pitch: (hotspot.position.y - 50) * 0.9,
+            yaw: (hotspot.position.x - 50) * 3.6,
+            type: "info",
+            text: hotspot.title,
+            originalHotspot: hotspot
+          }));
+        }
+        
+        // Load the new panorama
+        viewer.loadScene('default', sceneConfig, () => {
+          setIsLoading(false);
+        });
+      } catch (error) {
+        console.error("Failed to update panorama:", error);
         setIsLoading(false);
-      });
+        toast.error("Ошибка обновления панорамы");
+      }
     }
-  }, [panoramaUrl, viewer]);
+  }, [panoramaUrl, viewer, hotspots]);
 
   const closeHotspotInfo = () => {
     setActiveHotspot(null);
   };
 
   return (
-    <div className="relative w-full h-[500px] md:h-[70vh] overflow-hidden rounded-lg shadow-lg bg-black/10">
+    <div className="relative w-full overflow-hidden rounded-lg shadow-md bg-black/5" style={{ height }}>
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
-          <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
       
       <div ref={panoramaRef} className="w-full h-full" />
 
-      {/* Simplified Hotspot Information Panel */}
+      {/* Hotspot Information Panel */}
       {activeHotspot && (
         <div className="absolute right-4 top-4 max-w-xs bg-white/90 dark:bg-gray-800/90 p-3 rounded-lg shadow-md z-20">
           <button
@@ -181,15 +207,12 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
         </div>
       )}
 
-      <style>
-        {`
-          /* Minimized CSS */
-          .pnlm-container { background-color: #000 !important; }
-          .pnlm-hotspot { height: 20px; width: 20px; border-radius: 10px; }
-          .pnlm-hotspot-base.info { background-color: rgba(58, 68, 255, 0.7); border: 1px solid #fff; }
-          .pnlm-hotspot:hover { background-color: rgba(58, 68, 255, 1); }
-        `}
-      </style>
+      <style jsx>{`
+        .pnlm-container { background-color: transparent !important; }
+        .pnlm-hotspot { height: 20px; width: 20px; border-radius: 10px; }
+        .pnlm-hotspot-base.info { background-color: rgba(58, 68, 255, 0.7); border: 1px solid #fff; }
+        .pnlm-hotspot:hover { background-color: rgba(58, 68, 255, 1); }
+      `}</style>
     </div>
   );
 };
