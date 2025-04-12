@@ -1,6 +1,5 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { X } from 'lucide-react';
 import { toast } from "sonner";
 import 'pannellum/build/pannellum.css';
 
@@ -36,43 +35,48 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
   height = "500px"
 }) => {
   const panoramaRef = useRef<HTMLDivElement>(null);
-  const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewer, setViewer] = useState<any>(null);
-  const hasInitialized = useRef(false);
+  const viewerRef = useRef<any>(null);
+  const [initialized, setInitialized] = useState(false);
 
-  // Clear initialization flag when panorama URL changes
+  // Initialize or update Pannellum when component mounts or when panoramaUrl changes
   useEffect(() => {
-    if (panoramaUrl) {
-      hasInitialized.current = false;
+    // Make sure pannellum is available and container exists
+    if (!panoramaRef.current || typeof window === 'undefined' || !window.pannellum) {
+      console.error("Pannellum or container not available");
+      return;
     }
-  }, [panoramaUrl]);
 
-  // Set up Pannellum with optimized configuration
-  useEffect(() => {
-    // Early return if conditions aren't met
-    if (!panoramaRef.current || !window.pannellum || hasInitialized.current || !panoramaUrl) return;
-    
-    hasInitialized.current = true;
+    // If viewer already exists, destroy it before creating a new one
+    if (viewerRef.current) {
+      try {
+        viewerRef.current.destroy();
+      } catch (e) {
+        console.error("Error destroying previous viewer:", e);
+      }
+      viewerRef.current = null;
+    }
+
     setIsLoading(true);
-
-    // Convert hotspots to Pannellum format
-    const pannellumHotspots = hotspots.map(hotspot => ({
-      id: hotspot.id,
-      pitch: (hotspot.position.y - 50) * 0.9,
-      yaw: (hotspot.position.x - 50) * 3.6,
-      type: "info",
-      text: hotspot.title,
-      originalHotspot: hotspot
-    }));
+    console.log("Initializing Pannellum with URL:", panoramaUrl);
 
     try {
-      // Initialize Pannellum with optimal performance settings
-      const pannellumViewer = window.pannellum.viewer(panoramaRef.current, {
+      // Convert hotspots to Pannellum format
+      const pannellumHotspots = hotspots.map(hotspot => ({
+        id: hotspot.id,
+        pitch: (hotspot.position.y - 50) * 0.9,
+        yaw: (hotspot.position.x - 50) * 3.6,
+        type: "info",
+        text: hotspot.title,
+        originalHotspot: hotspot
+      }));
+
+      // Create new viewer
+      const viewer = window.pannellum.viewer(panoramaRef.current, {
         type: 'equirectangular',
         panorama: panoramaUrl,
         autoLoad: true,
-        autoRotate: autoRotate ? -1 : 0,
+        autoRotate: autoRotate ? 2 : 0,
         compass: false,
         showZoomCtrl: true,
         showFullscreenCtrl: true,
@@ -85,10 +89,11 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
         touchPanEnabled: true,
         draggable: true,
         disableKeyboardCtrl: false,
-        dynamic: false,
         sceneFadeDuration: 300,
         onLoad: () => {
+          console.log("Panorama loaded successfully");
           setIsLoading(false);
+          setInitialized(true);
           toast.success("Панорама загружена", {
             duration: 1500,
           });
@@ -102,37 +107,36 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
         }
       });
 
-      // Handle hotspot clicks
-      if (hotspots.length > 0) {
-        pannellumViewer.on('click', (event: MouseEvent) => {
-          const clickedHotspot = pannellumViewer.getHotspotById(pannellumViewer.mouseEventToCoords(event));
+      // Store viewer reference
+      viewerRef.current = viewer;
+
+      // Set up hotspot click handler
+      if (hotspots.length > 0 && onHotspotClick) {
+        viewer.on('click', (event: MouseEvent) => {
+          const clickedHotspot = viewer.getHotspotById(viewer.mouseEventToCoords(event));
           if (clickedHotspot && clickedHotspot.originalHotspot) {
-            setActiveHotspot(clickedHotspot.originalHotspot);
-            if (onHotspotClick) {
-              onHotspotClick(clickedHotspot.originalHotspot);
-            }
+            onHotspotClick(clickedHotspot.originalHotspot);
           }
         });
       }
-
-      setViewer(pannellumViewer);
-
-      // Clean up on unmount
-      return () => {
-        if (pannellumViewer) {
-          pannellumViewer.destroy();
-        }
-      };
     } catch (error) {
       console.error("Failed to initialize panorama:", error);
       setIsLoading(false);
       toast.error("Ошибка инициализации панорамы");
     }
-  }, [panoramaUrl, hotspots, onHotspotClick, autoRotate, initialHfov]);
 
-  const closeHotspotInfo = () => {
-    setActiveHotspot(null);
-  };
+    // Clean up on unmount
+    return () => {
+      if (viewerRef.current) {
+        try {
+          viewerRef.current.destroy();
+        } catch (e) {
+          console.error("Error destroying viewer:", e);
+        }
+        viewerRef.current = null;
+      }
+    };
+  }, [panoramaUrl, hotspots, onHotspotClick, autoRotate, initialHfov]);
 
   return (
     <div className="relative w-full overflow-hidden rounded-lg shadow-md bg-black/5" style={{ height }}>
@@ -144,51 +148,12 @@ const PanoramaViewer: React.FC<PanoramaViewerProps> = ({
       
       <div ref={panoramaRef} className="w-full h-full" />
 
-      {/* Hotspot Information Panel */}
-      {activeHotspot && (
-        <div className="absolute right-4 top-4 max-w-xs bg-white/90 dark:bg-gray-800/90 p-3 rounded-lg shadow-md z-20">
-          <button
-            onClick={closeHotspotInfo}
-            className="absolute right-2 top-2 text-foreground/80 hover:text-foreground"
-            aria-label="Закрыть"
-          >
-            <X size={14} />
-          </button>
-          
-          <h3 className="text-base font-medium mb-1">{activeHotspot.title}</h3>
-          
-          {activeHotspot.image && (
-            <img
-              src={activeHotspot.image}
-              alt={activeHotspot.title}
-              className="w-full h-auto object-cover mb-2 rounded"
-              loading="lazy"
-            />
-          )}
-          
-          <p className="text-xs text-foreground/80 mb-2">{activeHotspot.description}</p>
-          
-          {activeHotspot.link && (
-            <a
-              href={activeHotspot.link}
-              className="text-xs text-primary hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Подробнее
-            </a>
-          )}
-        </div>
-      )}
-
-      <style>
-        {`
+      <style jsx>{`
         .pnlm-container { background-color: transparent !important; }
         .pnlm-hotspot { height: 20px; width: 20px; border-radius: 10px; }
         .pnlm-hotspot-base.info { background-color: rgba(58, 68, 255, 0.7); border: 1px solid #fff; }
         .pnlm-hotspot:hover { background-color: rgba(58, 68, 255, 1); }
-        `}
-      </style>
+      `}</style>
     </div>
   );
 };
